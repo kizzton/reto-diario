@@ -1,36 +1,186 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧠 Reto Diario
 
-## Getting Started
+Juego diario minimalista inspirado en retos de letras tipo Wordle, donde el usuario debe formar la mejor palabra posible con un conjunto limitado de letras.
 
-First, run the development server:
+Diseñado para ser:
+- Simple
+- Rápido
+- Compartible
+- Mobile-first
+
+---
+
+## 🚀 Estado actual del proyecto
+
+Versión funcional desplegable con:
+
+- ✅ Sistema de selección de letras mediante teclado propio (sin teclado del móvil)
+- ✅ Gestión correcta de letras repetidas (por índice, no por carácter)
+- ✅ Atenuación visual al usar letras
+- ✅ Botón de borrar (`handleDelete`)
+- ✅ Validación contra diccionario local
+- ✅ Normalización de palabra (trim + uppercase)
+- ✅ Bloqueo tras finalizar partida
+- ✅ Diseño oscuro minimalista
+- ✅ Preparado para despliegue en Vercel
+
+---
+
+## 🏗️ Stack Tecnológico
+
+- **Next.js 16 (App Router)**
+- React (Client Components)
+- TypeScript
+- CSS global simple (sin framework externo)
+- Deploy en Vercel
+
+---
+
+## 📁 Estructura del proyecto
+
+```
+app/
+  page.tsx
+  globals.css
+
+components/
+  LettersGame.tsx
+
+lib/
+  dictionary.ts
+  game/
+    getDailyGame.ts
+```
+
+---
+
+## 🧩 Lógica clave implementada
+
+### 1️⃣ Gestión correcta de letras repetidas
+
+En lugar de guardar letras seleccionadas, se guardan **índices** de las letras usadas:
+
+```ts
+const [selectedIndexes, setSelectedIndexes] = useState<number[]>([])
+```
+
+Esto permite que dos letras iguales (ej: dos "E") funcionen correctamente sin deshabilitar ambas al usar solo una.
+
+---
+
+### 2️⃣ Atenuación de letras usadas
+
+```ts
+const isUsed = selectedIndexes.includes(index)
+```
+
+Aplicado visualmente con:
+
+```ts
+opacity: isUsed ? 0.4 : 1
+pointerEvents: isUsed ? "none" : "auto"
+```
+
+---
+
+### 3️⃣ Borrar última letra
+
+```ts
+const handleDelete = () => {
+  if (finished) return
+  setSelectedIndexes(prev => prev.slice(0, -1))
+}
+```
+
+---
+
+### 4️⃣ Validación contra diccionario
+
+Normalización para evitar errores por formato:
+
+```ts
+const normalized = currentWord.trim().toUpperCase()
+const isValid = dictionary.includes(normalized)
+```
+
+⚠️ Todo el diccionario debe estar en el mismo formato (por ejemplo, todo en mayúsculas).
+
+---
+
+### 5️⃣ Estilo global
+
+En `globals.css`:
+
+```css
+body {
+  margin: 0;
+  background: #0b0b0b;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+```
+
+---
+
+## 🧪 Cómo ejecutar en local
+
+Instalar dependencias:
+
+```bash
+npm install
+```
+
+Ejecutar en desarrollo:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Probar build de producción:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🌍 Deploy
 
-To learn more about Next.js, take a look at the following resources:
+El proyecto está preparado para desplegarse en:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Subir repo a GitHub
+2. Conectar en https://vercel.com
+3. Deploy automático detectando Next.js
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🎯 Próximos pasos posibles
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Persistencia diaria real (semilla por fecha)
+- Sistema de puntuación
+- Ranking
+- Animaciones más pulidas
+- Feedback visual tipo Wordle (flip animation)
+- Modo cálculo (números)
+- Compartir resultado en formato visual (cuadros de colores)
+- Dominio propio
+
+---
+
+## 🧠 Filosofía del proyecto
+
+Publicar antes de perfeccionar.  
+Validar con usuarios reales.  
+Iterar rápido.
+
+Primero jugable.  
+Luego bonito.  
+Después escalable.
+
+---
+
+## 👨‍💻 Autor
+
+Miguel – Proyecto experimental de reto diario gamificado.
