@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 import dictionary from "@/lib/data/dictionary.json"
+import { loadDailyState, saveDailyState } from "@/lib/dailyState"
+import { shareDailyResult } from "@/lib/shareResult"
 
 interface Props {
   letters: string[]
@@ -40,22 +42,32 @@ export default function LettersGame({ letters, bestWord }: Props) {
     return () => clearTimeout(timer)
   }, [timeLeft, finished])
 
-  function finishGame() {
-    setFinished(true)
+function finishGame() {
+  setFinished(true)
 
-    const word = input.join("").trim()
+  const word = input.join("").trim()
 
-    if (!isValidWord(word)) {
-      setResult("invalid")
-      return
-    }
+  let score = 0
 
-    if (word.length === bestWord.length) {
-      setResult("max")
-    } else {
-      setResult("valid")
-    }
+  if (!isValidWord(word)) {
+    setResult("invalid")
+    score = 0
+  } 
+  else if (word.length === bestWord.length) {
+    setResult("max")
+    score = 10
+  } 
+  else {
+    setResult("valid")
+    score = word.length
   }
+
+  const daily = loadDailyState()
+  const finishedDay = daily.wordPlayed && daily.numbersPlayed
+  daily.wordPlayed = true
+  daily.wordScore = score
+  saveDailyState(daily)
+}
 
   // ---------------- COLORES ----------------
   function getBoxColor() {
@@ -99,32 +111,6 @@ export default function LettersGame({ letters, bestWord }: Props) {
     setInput(newInput)
 
     setSelectedIndex(Math.max(0, selectedIndex - 1))
-  }
-
-  // ---------------- SHARE ----------------
-  function shareResult() {
-    let emoji = "🔴"
-    let text = "Hoy me costó 😅"
-
-    if (result === "max") {
-      emoji = "🟢"
-      text = "¡Impresionante!"
-    } else if (result === "valid") {
-      emoji = "🟡"
-      text = "¡Casi perfecto!"
-    }
-
-    const message = `🧠 El Reto del Día
-🔤 La Palabra
-
-${emoji} ${text}
-
-¿Puedes superarlo?`
-
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(message)}`,
-      "_blank"
-    )
   }
 
   const currentWord = input.join("").trim()
@@ -202,38 +188,9 @@ ${emoji} ${text}
               <p>Inténtalo de nuevo mañana 😉</p>
             </>
           )}
-
-          <div style={{ marginTop: 20 }}>
-            <button
-              onClick={shareResult}
-              style={{
-                backgroundColor: "#4CAF50",
-                color: "white",
-                padding: "12px 24px",
-                borderRadius: 10,
-                border: "none",
-                marginRight: 15,
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
-              COMPARTIR
-            </button>
-
-            <button
-              style={{
-                backgroundColor: "#4A86C5",
-                color: "white",
-                padding: "12px 24px",
-                borderRadius: 10,
-                border: "none",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
-              EL CÁLCULO
-            </button>
-          </div>
+          <button onClick={shareDailyResult}>
+            COMPARTIR RESULTADO
+          </button>
         </div>
       )}
 

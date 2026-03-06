@@ -40,7 +40,7 @@ function seededRandom(seed: number) {
 
 const VOWELS = ["A", "E", "I", "O", "U"]
 
-export function generateLetters(seed: number): string[] {
+export function generateLettersGame(seed: number): string[] {
   const letters: string[] = []
   let currentSeed = seed
 

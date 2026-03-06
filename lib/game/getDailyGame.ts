@@ -1,15 +1,21 @@
-import { getDailySeed } from "../dailySeed"
-import { generateLetters } from "../letters/generator"
+import { getDailySeedLetters } from "../dailySeed"
+import { getDailySeedNumbers } from "../dailySeed"
+import { generateLettersGame } from "../letters/generator"
+import { generateNumbersGame } from "../numbers/generator"
 import { findBestWord } from "../letters/solver"
 import dictionary from "@/lib/data/dictionary.json"
 
-export function getDailyLettersGame() {
-  const seed = getDailySeed()
-  const letters = generateLetters(seed)
-  const bestWord = findBestWord(letters, dictionary)
+export function getDailyGame() {
+  const seedLetters = getDailySeedLetters()
+  const seedNumbers = getDailySeedNumbers()
+
+  const lettersGame = generateLettersGame(seedLetters)
+  const numbersGame = generateNumbersGame(seedNumbers)
+  const bestWord = findBestWord(lettersGame, dictionary)
 
   return {
-    letters,
+    letters: lettersGame,
     bestWord,
+    numbers: numbersGame
   }
 }

@@ -1,4 +1,4 @@
-export function getDailySeed(date?: Date): number {
+export function getDailySeedLetters(date?: Date): number {
   const today = date ?? new Date()
   const dateString = today.toISOString().split("T")[0]
 
@@ -8,4 +8,26 @@ export function getDailySeed(date?: Date): number {
   }
 
   return Math.abs(hash)
+}
+
+export function getDailySeedNumbers(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+export function createSeededRandom(seed: string) {
+  let h = 2166136261 >>> 0
+
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+
+  return function () {
+    h += h << 13
+    h ^= h >>> 7
+    h += h << 3
+    h ^= h >>> 17
+    h += h << 5
+    return (h >>> 0) / 4294967296
+  }
 }
