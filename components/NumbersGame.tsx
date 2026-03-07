@@ -15,15 +15,16 @@ import { shareDailyResult } from "@/lib/shareResult"
 
 type Props = {
   game: NumbersGame
+  alreadyPlayed?: boolean
 }
 
-export default function NumbersGame({ game }: Props) {
+export default function NumbersGame({ game, alreadyPlayed }: Props) {
     const [engine, setEngine] = useState(() =>
     createNumbersEngine(game.numbers, game.target)
     )
 
   const [timeLeft, setTimeLeft] = useState(40)
-  const [finished, setFinished] = useState(false)
+  const [finished, setFinished] = useState(alreadyPlayed ?? false)
 
   const lastResult = engine.resultNumbers.length
     ? engine.resultNumbers[engine.resultNumbers.length - 1].value
@@ -57,10 +58,18 @@ export default function NumbersGame({ game }: Props) {
   }
 
   useEffect(() => {
-  if (engine.finished) {
-    setFinished(true)
-  }
-}, [engine.finished])
+    if (engine.finished) {
+
+      setFinished(true)
+
+      const daily = loadDailyState()
+
+      daily.numbersPlayed = true
+      daily.numbersScore = score
+
+      saveDailyState(daily)
+    }
+  }, [engine.finished])
 
   const handleOperatorClick = (op: Operator) => {
     if (finished) return
@@ -94,15 +103,6 @@ export default function NumbersGame({ game }: Props) {
 
     return 0
   }
-
-  const daily = loadDailyState()
-
-  const finishedDay = daily.wordPlayed && daily.numbersPlayed
-
-  daily.numbersPlayed = true
-  daily.numbersScore = score
-
-  saveDailyState(daily)
 
   return (
     <div className="game-container">
@@ -194,6 +194,18 @@ export default function NumbersGame({ game }: Props) {
         </div>
       ))}
 
+      {finished && (() => {
+        const daily = loadDailyState()
+        if (daily.wordPlayed && daily.numbersPlayed) {
+          return (
+            <button onClick={shareDailyResult} className="w-full py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white">
+              COMPARTIR RESULTADO
+            </button>
+          )
+        }
+        return null
+      })()}
+
       {finished && (
         <div className="mt-6 text-center space-y-2">
 
@@ -262,10 +274,6 @@ export default function NumbersGame({ game }: Props) {
           </Tile>
         ))}
       </div>
-
-      <button onClick={shareDailyResult}>
-        COMPARTIR RESULTADO
-      </button>
 
       {/* OPERADORES + BORRAR */}
       <div className="row" style={{ marginTop: 20 }}>

@@ -4,13 +4,15 @@ import { useEffect, useState } from "react"
 import dictionary from "@/lib/data/dictionary.json"
 import { loadDailyState, saveDailyState } from "@/lib/dailyState"
 import { shareDailyResult } from "@/lib/shareResult"
+import "@/styles/game.css"
 
 interface Props {
   letters: string[]
   bestWord: string
+  alreadyPlayed?: boolean
 }
 
-export default function LettersGame({ letters, bestWord }: Props) {
+export default function LettersGame({ letters, bestWord, alreadyPlayed }: Props) {
   const MAX_LENGTH = letters.length
 
   const [input, setInput] = useState<string[]>(
@@ -18,7 +20,7 @@ export default function LettersGame({ letters, bestWord }: Props) {
   )
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [timeLeft, setTimeLeft] = useState(40)
-  const [finished, setFinished] = useState(false)
+  const [finished, setFinished] = useState(alreadyPlayed ?? false)
   const [result, setResult] = useState<"max" | "valid" | "invalid" | null>(null)
 
   // ---------------- VALIDACIÓN ----------------
@@ -63,7 +65,6 @@ function finishGame() {
   }
 
   const daily = loadDailyState()
-  const finishedDay = daily.wordPlayed && daily.numbersPlayed
   daily.wordPlayed = true
   daily.wordScore = score
   saveDailyState(daily)
@@ -121,21 +122,14 @@ function finishGame() {
       <h3 style={{ color: "#777", marginTop: 0 }}>LA PALABRA</h3>
 
       {/* Cajas */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 1,
-          marginTop: 30,
-        }}
-      >
+      <div className="row" style={{ gap: 2 }}>
         {input.map((letter, index) => (
           <div
             key={index}
             onClick={() => setSelectedIndex(index)}
             style={{
-              width: 55,
-              height: 55,
+              width: 40,
+              height: 50,
               borderRadius: 8,
               border:
                 selectedIndex === index && !finished
@@ -188,9 +182,17 @@ function finishGame() {
               <p>Inténtalo de nuevo mañana 😉</p>
             </>
           )}
-          <button onClick={shareDailyResult}>
-            COMPARTIR RESULTADO
-          </button>
+          {finished && (() => {
+            const daily = loadDailyState()
+            if (daily.wordPlayed && daily.numbersPlayed) {
+              return (
+                <button onClick={shareDailyResult} className="w-full py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
+                  COMPARTIR RESULTADO
+                </button>
+              )
+            }
+            return null
+          })()}
         </div>
       )}
 

@@ -1,22 +1,35 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { getDailyGame } from "@/lib/game/getDailyGame"
-import { useState } from "react"
 import NumbersGame from "@/components/NumbersGame"
 import GameIntroModal from "@/components/GameIntroModal"
-import { createNumbersEngine, selectNumber, selectOperator } from "@/lib/numbers/engine"
 import { loadDailyState } from "@/lib/dailyState"
-
-const daily = loadDailyState()
-
-const wordDone = daily.wordPlayed
-const numbersDone = daily.numbersPlayed
 
 const game = getDailyGame()
 
 export default function CalculoPage() {
 
   const [started, setStarted] = useState(false)
+  const [alreadyPlayed, setAlreadyPlayed] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const daily = loadDailyState()
+    setAlreadyPlayed(daily.wordPlayed)
+  }, [])
+
+  if (alreadyPlayed === null) {
+    return null
+  }
+
+  if (alreadyPlayed) {
+    return (
+      <NumbersGame
+        game={game.numbers}
+        alreadyPlayed={true}
+      />
+    )
+  }
 
   return (
     <main className="flex justify-center pt-10">
@@ -30,7 +43,10 @@ export default function CalculoPage() {
       )}
 
       {started && (
-        <NumbersGame game={game.numbers} />
+        <NumbersGame 
+          game={game.numbers}
+          alreadyPlayed={alreadyPlayed}
+        />
       )}
 
     </main>
