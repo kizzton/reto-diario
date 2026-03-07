@@ -15,7 +15,7 @@ export default function CalculoPage() {
 
   useEffect(() => {
     const daily = loadDailyState()
-    setAlreadyPlayed(daily.wordPlayed)
+    setAlreadyPlayed(daily.numbersPlayed)
   }, [])
 
   if (alreadyPlayed === null) {

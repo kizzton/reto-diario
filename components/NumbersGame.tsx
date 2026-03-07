@@ -8,7 +8,7 @@ import {
   selectOperator,
   deleteLast
 } from "@/lib/numbers/engine"
-import type { NumbersGame, Operator } from "@/lib/numbers/types"
+import type { NumbersGame, NumbersEngineState, Operator } from "@/lib/numbers/types"
 import "@/styles/game.css"
 import { loadDailyState, saveDailyState } from "@/lib/dailyState"
 import { shareDailyResult } from "@/lib/shareResult"
@@ -19,16 +19,28 @@ type Props = {
 }
 
 export default function NumbersGame({ game, alreadyPlayed }: Props) {
-    const [engine, setEngine] = useState(() =>
-    createNumbersEngine(game.numbers, game.target)
-    )
+    const [engine, setEngine] = useState(() => {
+
+      const daily = loadDailyState()
+
+      if (alreadyPlayed && daily.numbersEngine) {
+        return daily.numbersEngine
+      }
+
+      return createNumbersEngine(game.numbers, game.target)
+    })
 
   const [timeLeft, setTimeLeft] = useState(40)
   const [finished, setFinished] = useState(alreadyPlayed ?? false)
 
-  const lastResult = engine.resultNumbers.length
-    ? engine.resultNumbers[engine.resultNumbers.length - 1].value
-    : null
+  const daily = loadDailyState()
+
+  const lastResult =
+    engine.resultNumbers.length
+      ? engine.resultNumbers[engine.resultNumbers.length - 1].value
+      : finished
+      ? daily.numbersResult ?? null
+      : null
 
   const score = computeScore(engine.target, lastResult)
 
@@ -39,7 +51,7 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
     if (finished) return
 
     const interval = setInterval(() => {
-      setTimeLeft(prev => {
+      setTimeLeft((prev: number) => {
         if (prev <= 1) {
           clearInterval(interval)
           setFinished(true)
@@ -54,7 +66,7 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
 
   const handleNumberClick = (id: string) => {
     if (finished) return
-    setEngine(prev => ({ ...selectNumber(prev, id) }))
+      setEngine((prev: NumbersEngineState) => ({ ...selectNumber(prev, id) }))
   }
 
   useEffect(() => {
@@ -66,6 +78,11 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
 
       daily.numbersPlayed = true
       daily.numbersScore = score
+      if (lastResult !== null) {
+        daily.numbersResult = lastResult
+      }
+
+      daily.numbersEngine = engine
 
       saveDailyState(daily)
     }
@@ -73,19 +90,19 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
 
   const handleOperatorClick = (op: Operator) => {
     if (finished) return
-    setEngine(prev => ({ ...selectOperator(prev, op) }))
+      setEngine((prev: NumbersEngineState) => ({ ...selectOperator(prev, op) }))
   }
 
   const handleDelete = () => {
     if (finished) return
-    setEngine(prev => ({ ...deleteLast(prev) }))
+      setEngine((prev: NumbersEngineState) => ({ ...deleteLast(prev) }))
   }
 
   const getValue = (id: string | null) => {
     if (!id) return ""
-    const base = engine.baseNumbers.find(n => n.id === id)
+    const base = engine.baseNumbers.find((n: any) => n.id === id)
     if (base) return base.value
-    const result = engine.resultNumbers.find(r => r.id === id)
+    const result = engine.resultNumbers.find((r: any) => r.id === id)
     if (result) return result.value
     return ""
   }
@@ -129,7 +146,7 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
       </div>
 
       {/* FILAS DE OPERACIÓN */}
-      {engine.rows.map((row, index) => (
+      {engine.rows.map((row: any, index: number) => (
         <div className="row" key={index}>
           <Tile
             variant={
@@ -264,7 +281,7 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
 
       {/* NÚMEROS BASE */}
       <div className="row" style={{ marginTop: 30 }}>
-        {engine.baseNumbers.map(n => (
+        {engine.baseNumbers.map((n: any) => (
           <Tile
             key={n.id}
             variant={n.used ? "used" : "available"}
@@ -298,9 +315,9 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
   )
 
   function isUsed(id: string) {
-    const base = engine.baseNumbers.find(n => n.id === id)
+    const base = engine.baseNumbers.find((n: any) => n.id === id)
     if (base) return base.used
-    const result = engine.resultNumbers.find(r => r.id === id)
+    const result = engine.resultNumbers.find((r: any) => r.id === id)
     if (result) return result.used
     return false
   }

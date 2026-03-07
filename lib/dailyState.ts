@@ -4,6 +4,9 @@ export interface DailyGameState {
   numbersPlayed: boolean
   wordScore: number
   numbersScore: number
+
+  numbersResult?: number
+  numbersEngine?: any
 }
 
 function today(): string {
