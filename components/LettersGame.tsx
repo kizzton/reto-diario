@@ -170,7 +170,7 @@ useEffect(() => {
 
   return (
     <div style={{ textAlign: "center", marginTop: 40 }}>
-      <h1 style={{ marginBottom: 4 }}>EL RETO DEL DÍA</h1>
+      <h1 style={{ marginBottom: 4 }}><a href="https://elretodeldia.es">EL RETO DEL DÍA</a></h1>
       <h3 style={{ color: "#777", marginTop: 0 }}>LA PALABRA</h3>
 
       {/* Cajas */}

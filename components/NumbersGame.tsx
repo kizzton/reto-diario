@@ -35,7 +35,7 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
   const [finished, setFinished] = useState(alreadyPlayed ?? false)
   const [dailyState, setDailyState] = useState(() => loadDailyState())
 
-  const daily = loadDailyState()
+  const [daily] = useState(() => loadDailyState())
 
   const lastResult =
     engine.resultNumbers.length
@@ -57,6 +57,7 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
         if (prev <= 1) {
           clearInterval(interval)
           setFinished(true)
+          saveGame()
           return 0
         }
         return prev - 1
@@ -73,22 +74,8 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
 
   useEffect(() => {
     if (engine.finished) {
-
       setFinished(true)
-
-      const updated = loadDailyState()
-
-      updated.numbersPlayed = true
-      updated.numbersScore = score
-
-      if (lastResult !== null) {
-        updated.numbersResult = lastResult
-      }
-
-      updated.numbersEngine = engine
-
-      saveDailyState(updated)
-      setDailyState(updated)
+      saveGame()
     }
   }, [engine.finished])
 
@@ -125,8 +112,26 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
     return 0
   }
 
+  function saveGame() {
+
+    const updated = loadDailyState()
+
+    updated.numbersPlayed = true
+    updated.numbersScore = score
+
+    if (lastResult !== null) {
+      updated.numbersResult = lastResult
+    }
+
+    updated.numbersEngine = engine
+
+    saveDailyState(updated)
+    setDailyState(updated)
+  }
+
   return (
     <div className="game-container">
+      <h1 style={{ marginBottom: 4 }}><a href="https://elretodeldia.es">EL RETO DEL DÍA</a></h1>
       <h2 style={{ textAlign: "center" }}>EL CÁLCULO</h2>
 
       <div style={{ textAlign: "center", marginBottom: 20 }}>

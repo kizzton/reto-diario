@@ -34,7 +34,6 @@ export default function PalabraPage() {
 
   return (
     <main className="flex justify-center pt-10">
-
       {!started && (
         <GameIntroModal
           title="La palabra del día"

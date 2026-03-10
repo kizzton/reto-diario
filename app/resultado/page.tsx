@@ -12,9 +12,7 @@ export default function ResultadoPage() {
   return (
     <div className="max-w-md mx-auto p-6 text-center">
 
-      <h1 className="text-2xl font-bold mb-4">
-        Reto diario
-      </h1>
+      <h1 style={{ marginBottom: 4 }}><a href="https://elretodeldia.es">EL RETO DEL DÍA</a></h1>
 
       <p className="text-lg">
         🔤 Palabra: {daily.wordScore}
