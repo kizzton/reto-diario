@@ -1,10 +1,13 @@
 export interface DailyGameState {
   date: string
-  wordPlayed: boolean
-  numbersPlayed: boolean
-  wordScore: number
-  numbersScore: number
 
+  wordPlayed: boolean
+  wordScore: number
+  wordInput?: string
+  wordResult?: "max" | "valid" | "invalid"
+
+  numbersPlayed: boolean
+  numbersScore: number
   numbersResult?: number
   numbersEngine?: any
 }

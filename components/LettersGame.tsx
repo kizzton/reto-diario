@@ -16,15 +16,34 @@ interface Props {
 export default function LettersGame({ letters, bestWord, alreadyPlayed }: Props) {
   const MAX_LENGTH = letters.length
 
-  const [input, setInput] = useState<string[]>(
-    Array(MAX_LENGTH).fill("")
-  )
+  const [input, setInput] = useState<string[]>(() => {
+    if (alreadyPlayed) {
+      const daily = loadDailyState()
+
+      if (daily.wordInput) {
+        const savedLetters = daily.wordInput.split("")
+        return [...savedLetters, ...Array(MAX_LENGTH - savedLetters.length).fill("")]
+      }
+    }
+
+    return Array(MAX_LENGTH).fill("")
+  })
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(40)
+  const [timeLeft, setTimeLeft] = useState(alreadyPlayed ? 0 : 40)
   const [finished, setFinished] = useState(alreadyPlayed ?? false)
-  const [result, setResult] = useState<"max" | "valid" | "invalid" | null>(null)
+  const [result, setResult] = useState<"max" | "valid" | "invalid" | null>(() => {
+    if (alreadyPlayed) {
+      const daily = loadDailyState()
+      return daily.wordResult ?? null
+    }
+    return null
+  })
 
   const [dailyState, setDailyState] = useState(() => loadDailyState())
+  useEffect(() => {
+    const daily = loadDailyState()
+    setDailyState(daily)
+  }, [])
 
   // ---------------- VALIDACIÓN ----------------
   function isValidWord(word: string) {
@@ -48,33 +67,60 @@ export default function LettersGame({ letters, bestWord, alreadyPlayed }: Props)
   }, [timeLeft, finished])
 
 function finishGame() {
+
+  if (finished) return
+
   setFinished(true)
 
   const word = input.join("").trim()
 
   let score = 0
+  let gameResult: "max" | "valid" | "invalid"
 
   if (!isValidWord(word)) {
-    setResult("invalid")
+    gameResult = "invalid"
     score = 0
   } 
   else if (word.length === bestWord.length) {
-    setResult("max")
+    gameResult = "max"
     score = 10
   } 
   else {
-    setResult("valid")
+    gameResult = "valid"
     score = word.length
   }
 
-  const updated = loadDailyState()
+  setResult(gameResult)
 
-  updated.wordPlayed = true
-  updated.wordScore = score
+  const previous = loadDailyState()
+
+  const updated = {
+    ...previous,
+    wordPlayed: true,
+    wordScore: score,
+    wordInput: word,
+    wordResult: gameResult
+  }
 
   saveDailyState(updated)
   setDailyState(updated)
 }
+
+useEffect(() => {
+  if (!alreadyPlayed) return
+
+  const daily = loadDailyState()
+
+  if (daily.wordInput) {
+    const savedLetters = daily.wordInput.split("")
+    const rebuilt = [
+      ...savedLetters,
+      ...Array(MAX_LENGTH - savedLetters.length).fill("")
+    ]
+
+    setInput(rebuilt)
+  }
+}, [alreadyPlayed])
 
   // ---------------- COLORES ----------------
   function getBoxColor() {
@@ -188,6 +234,9 @@ function finishGame() {
               <p>Inténtalo de nuevo mañana 😉</p>
             </>
           )}
+          <p style={{ marginTop: 10, fontWeight: "bold" }}>
+            Puntos: {dailyState.wordScore}
+          </p>
         </div>
       )}
 
