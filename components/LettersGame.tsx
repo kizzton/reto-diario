@@ -5,6 +5,7 @@ import dictionary from "@/lib/data/dictionary.json"
 import { loadDailyState, saveDailyState } from "@/lib/dailyState"
 import { shareDailyResult } from "@/lib/shareResult"
 import "@/styles/game.css"
+import Link from "next/link"
 
 interface Props {
   letters: string[]
@@ -22,6 +23,8 @@ export default function LettersGame({ letters, bestWord, alreadyPlayed }: Props)
   const [timeLeft, setTimeLeft] = useState(40)
   const [finished, setFinished] = useState(alreadyPlayed ?? false)
   const [result, setResult] = useState<"max" | "valid" | "invalid" | null>(null)
+
+  const [dailyState, setDailyState] = useState(() => loadDailyState())
 
   // ---------------- VALIDACIÓN ----------------
   function isValidWord(word: string) {
@@ -64,10 +67,13 @@ function finishGame() {
     score = word.length
   }
 
-  const daily = loadDailyState()
-  daily.wordPlayed = true
-  daily.wordScore = score
-  saveDailyState(daily)
+  const updated = loadDailyState()
+
+  updated.wordPlayed = true
+  updated.wordScore = score
+
+  saveDailyState(updated)
+  setDailyState(updated)
 }
 
   // ---------------- COLORES ----------------
@@ -182,19 +188,30 @@ function finishGame() {
               <p>Inténtalo de nuevo mañana 😉</p>
             </>
           )}
-          {finished && (() => {
-            const daily = loadDailyState()
-            if (daily.wordPlayed && daily.numbersPlayed) {
-              return (
-                <button onClick={shareDailyResult} className="w-full py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
-                  COMPARTIR RESULTADO
-                </button>
-              )
-            }
-            return null
-          })()}
         </div>
       )}
+
+      {finished && (
+  <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+
+    {!dailyState.numbersPlayed && (
+      <Link href="/calculo">
+        <button className="px-4 py-2 bg-blue-500 text-white rounded-lg">
+          Jugar cálculo
+        </button>
+      </Link>
+    )}
+
+    {dailyState.numbersPlayed && (
+          <Link href="/resultado">
+            <button className="px-4 py-2 bg-green-500 text-white rounded-lg">
+              Ver resultado diario
+            </button>
+          </Link>
+        )}
+
+      </div>
+    )}
 
       {/* Teclado */}
       <div
