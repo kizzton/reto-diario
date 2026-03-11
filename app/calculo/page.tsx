@@ -37,7 +37,7 @@ export default function CalculoPage() {
       {!started && (
         <GameIntroModal
           title="El cálculo del día"
-          rules="Usa los números disponibles para alcanzar el objetivo en 40 segundos."
+          rules="Usa los números disponibles para alcanzar el objetivo en 60 segundos."
           onStart={() => setStarted(true)}
         />
       )}

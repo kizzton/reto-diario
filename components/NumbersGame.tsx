@@ -31,18 +31,26 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
       return createNumbersEngine(game.numbers, game.target)
     })
 
-  const [timeLeft, setTimeLeft] = useState(40)
+  const [timeLeft, setTimeLeft] = useState(alreadyPlayed ? 0:60)
   const [finished, setFinished] = useState(alreadyPlayed ?? false)
   const [dailyState, setDailyState] = useState(() => loadDailyState())
 
-  const [daily] = useState(() => loadDailyState())
+  const lastResult = (() => {
 
-  const lastResult =
-    engine.resultNumbers.length
-      ? engine.resultNumbers[engine.resultNumbers.length - 1].value
-      : finished
-      ? daily.numbersResult ?? null
-      : null
+    // si ya se jugó hoy, usar siempre el resultado guardado
+    if (alreadyPlayed) {
+      const daily = loadDailyState()
+      return daily.numbersResult ?? null
+    }
+
+    // durante partida usar último resultado del engine
+    if (engine.resultNumbers.length) {
+      return engine.resultNumbers[engine.resultNumbers.length - 1].value
+    }
+
+    return null
+
+  })()
 
   const score = computeScore(engine.target, lastResult)
 
@@ -79,6 +87,18 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
     }
   }, [engine.finished])
 
+  useEffect(() => {
+    const handleUnload = () => {
+      if (!finished) saveGame()
+    }
+
+    window.addEventListener("beforeunload", handleUnload)
+
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload)
+    }
+  }, [engine, finished])
+
   const handleOperatorClick = (op: Operator) => {
     if (finished) return
       setEngine((prev: NumbersEngineState) => ({ ...selectOperator(prev, op) }))
@@ -105,24 +125,34 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
     const diff = Math.abs(target - result)
 
     if (diff === 0) return 10
-    if (diff === 1) return 7
-    if (diff === 2) return 5
-    if (diff <= 5) return 3
+    if (diff === 1) return 9
+    if (diff === 2) return 8
+    if (diff === 3) return 7
+    if (diff === 4) return 6
+    if (diff === 5) return 5
+    if (diff === 6) return 4
+    if (diff === 7) return 3
+    if (diff === 8) return 2
+    if (diff === 9) return 1
 
     return 0
   }
 
   function saveGame() {
 
-    const updated = loadDailyState()
+    const updated = { ...dailyState }
 
     updated.numbersPlayed = true
-    updated.numbersScore = score
 
-    if (lastResult !== null) {
-      updated.numbersResult = lastResult
-    }
+    const finalResult =
+      engine.resultNumbers.length > 0
+        ? engine.resultNumbers[engine.resultNumbers.length - 1].value
+        : null
 
+    const finalScore = computeScore(engine.target, finalResult)
+
+    updated.numbersScore = finalScore
+    updated.numbersResult = finalResult
     updated.numbersEngine = engine
 
     saveDailyState(updated)
@@ -138,7 +168,7 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
         <div style={{ fontSize: 24, fontWeight: 600 }}>
           Objetivo: {game.target}
         </div>
-        {lastResult && !finished && (
+        {lastResult !== null && !finished && (
           <div className="text-sm text-gray-500 mt-2">
             Diferencia actual: {Math.abs(engine.target - lastResult)}
           </div>

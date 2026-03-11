@@ -29,7 +29,7 @@ export default function LettersGame({ letters, bestWord, alreadyPlayed }: Props)
     return Array(MAX_LENGTH).fill("")
   })
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(alreadyPlayed ? 0 : 40)
+  const [timeLeft, setTimeLeft] = useState(alreadyPlayed ? 0:60)
   const [finished, setFinished] = useState(alreadyPlayed ?? false)
   const [result, setResult] = useState<"max" | "valid" | "invalid" | null>(() => {
     if (alreadyPlayed) {
@@ -47,7 +47,7 @@ export default function LettersGame({ letters, bestWord, alreadyPlayed }: Props)
 
   // ---------------- VALIDACIÓN ----------------
   function isValidWord(word: string) {
-    return dictionary.includes(word.toUpperCase())
+    return dictionary.includes(word.toLowerCase())
   }
 
   // ---------------- TIMER ----------------
@@ -202,8 +202,14 @@ useEffect(() => {
         ))}
       </div>
 
-      <div style={{ marginTop: 10, color: "#666" }}>
-        {timeLeft}:00
+      <div
+          style={{
+            marginTop: 8,
+            fontSize: 18,
+            color: timeLeft <= 10 ? "#dc2626" : "#111"
+          }}
+        >
+        {timeLeft}s
       </div>
 
       {/* Mensaje resultado */}

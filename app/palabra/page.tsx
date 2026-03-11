@@ -37,7 +37,7 @@ export default function PalabraPage() {
       {!started && (
         <GameIntroModal
           title="La palabra del día"
-          rules="Consigue la palabra más larga posible con las letras dadas en 40 segundos."
+          rules="Consigue la palabra más larga posible con las letras dadas en 60 segundos."
           onStart={() => setStarted(true)}
         />
       )}

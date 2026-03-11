@@ -19,7 +19,7 @@ Versión funcional desplegable con:
 - ✅ Atenuación visual al usar letras
 - ✅ Botón de borrar (`handleDelete`)
 - ✅ Validación contra diccionario local
-- ✅ Normalización de palabra (trim + uppercase)
+- ✅ Normalización de palabra (trim + lowercase)
 - ✅ Bloqueo tras finalizar partida
 - ✅ Diseño oscuro minimalista
 - ✅ Preparado para despliegue en Vercel
@@ -99,7 +99,7 @@ const handleDelete = () => {
 Normalización para evitar errores por formato:
 
 ```ts
-const normalized = currentWord.trim().toUpperCase()
+const normalized = currentWord.trim().toLowerCase()
 const isValid = dictionary.includes(normalized)
 ```
 
