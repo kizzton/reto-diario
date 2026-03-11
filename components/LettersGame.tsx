@@ -47,7 +47,7 @@ export default function LettersGame({ letters, bestWord, alreadyPlayed }: Props)
 
   // ---------------- VALIDACIÓN ----------------
   function isValidWord(word: string) {
-    return dictionary.includes(word.toLowerCase())
+    return dictionary.includes(word.toUpperCase())
   }
 
   // ---------------- TIMER ----------------

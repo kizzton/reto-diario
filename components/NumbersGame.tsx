@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import Tile from "@/components/ui/Tile"
 import {
   createNumbersEngine,
@@ -13,6 +13,7 @@ import "@/styles/game.css"
 import { loadDailyState, saveDailyState } from "@/lib/dailyState"
 import { shareDailyResult } from "@/lib/shareResult"
 import Link from "next/link"
+import type { ResultNumber } from "@/lib/numbers/types"
 
 type Props = {
   game: NumbersGame
@@ -55,6 +56,12 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
   const score = computeScore(engine.target, lastResult)
 
   const [showSolution, setShowSolution] = useState(false)
+
+  const engineRef = useRef(engine)
+
+  useEffect(() => {
+    engineRef.current = engine
+  }, [engine])
 
   // ⏱ Temporizador
   useEffect(() => {
@@ -140,20 +147,22 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
 
   function saveGame() {
 
+    const currentEngine = engineRef.current
+
     const updated = { ...dailyState }
 
     updated.numbersPlayed = true
 
     const finalResult =
-      engine.resultNumbers.length > 0
-        ? engine.resultNumbers[engine.resultNumbers.length - 1].value
+      currentEngine.resultNumbers.length > 0
+        ? currentEngine.resultNumbers[currentEngine.resultNumbers.length - 1].value
         : null
 
-    const finalScore = computeScore(engine.target, finalResult)
+    const finalScore = computeScore(currentEngine.target, finalResult)
 
     updated.numbersScore = finalScore
     updated.numbersResult = finalResult
-    updated.numbersEngine = engine
+    updated.numbersEngine = currentEngine
 
     saveDailyState(updated)
     setDailyState(updated)
