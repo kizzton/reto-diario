@@ -1,186 +1,242 @@
-# 🧠 Reto Diario
+# EL RETO DEL DÍA
 
-Juego diario minimalista inspirado en retos de letras tipo Wordle, donde el usuario debe formar la mejor palabra posible con un conjunto limitado de letras.
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![React](https://img.shields.io/badge/React-18-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Status](https://img.shields.io/badge/status-beta-orange)
+![License](https://img.shields.io/badge/license-personal-lightgrey)
 
-Diseñado para ser:
-- Simple
-- Rápido
-- Compartible
-- Mobile-first
+Juego diario online de lógica y cálculo.
 
----
+Cada día los jugadores deben resolver **dos retos diferentes**:
 
-## 🚀 Estado actual del proyecto
+🔤 **La Palabra del Día**\
+➗ **El Cálculo del Día**
 
-Versión funcional desplegable con:
+El objetivo es conseguir la **máxima puntuación posible** resolviendo
+ambos desafíos.
 
-- ✅ Sistema de selección de letras mediante teclado propio (sin teclado del móvil)
-- ✅ Gestión correcta de letras repetidas (por índice, no por carácter)
-- ✅ Atenuación visual al usar letras
-- ✅ Botón de borrar (`handleDelete`)
-- ✅ Validación contra diccionario local
-- ✅ Normalización de palabra (trim + uppercase)
-- ✅ Bloqueo tras finalizar partida
-- ✅ Diseño oscuro minimalista
-- ✅ Preparado para despliegue en Vercel
+🌐 https://elretodeldia.es
 
----
+------------------------------------------------------------------------
 
-## 🏗️ Stack Tecnológico
+# 🎮 Cómo funciona
 
-- **Next.js 16 (App Router)**
-- React (Client Components)
-- TypeScript
-- CSS global simple (sin framework externo)
-- Deploy en Vercel
+Cada día se genera un reto único compuesto por dos juegos.
 
----
+## 🔤 La Palabra del Día
 
-## 📁 Estructura del proyecto
+Un juego tipo Wordle en el que debes adivinar una palabra.
 
-```
-app/
-  page.tsx
-  globals.css
+Características:
 
-components/
-  LettersGame.tsx
+-   número limitado de intentos
+-   feedback visual por letras
+-   puntuación basada en eficiencia
 
-lib/
-  dictionary.ts
-  game/
-    getDailyGame.ts
-```
+------------------------------------------------------------------------
 
----
+## ➗ El Cálculo del Día
 
-## 🧩 Lógica clave implementada
+Un reto de cálculo mental.
 
-### 1️⃣ Gestión correcta de letras repetidas
+El jugador recibe:
 
-En lugar de guardar letras seleccionadas, se guardan **índices** de las letras usadas:
+-   varios números base
+-   un número objetivo
 
-```ts
-const [selectedIndexes, setSelectedIndexes] = useState<number[]>([])
-```
+Debe combinar los números usando:
 
-Esto permite que dos letras iguales (ej: dos "E") funcionen correctamente sin deshabilitar ambas al usar solo una.
+-   
+-   × ÷
 
----
+Para acercarse lo máximo posible al número objetivo antes de que termine
+el tiempo.
 
-### 2️⃣ Atenuación de letras usadas
+Reglas:
 
-```ts
-const isUsed = selectedIndexes.includes(index)
-```
+-   se pueden reutilizar los resultados de operaciones anteriores
+-   cada número solo puede usarse una vez
+-   hay límite de tiempo
 
-Aplicado visualmente con:
+Ejemplo:
 
-```ts
-opacity: isUsed ? 0.4 : 1
-pointerEvents: isUsed ? "none" : "auto"
-```
+3 + 7 = 10\
+10 × 5 = 50
 
----
+------------------------------------------------------------------------
 
-### 3️⃣ Borrar última letra
+# 🏆 Sistema de puntuación
 
-```ts
-const handleDelete = () => {
-  if (finished) return
-  setSelectedIndexes(prev => prev.slice(0, -1))
-}
-```
+La puntuación depende de lo cerca que esté el resultado del número
+objetivo.
 
----
+  Diferencia   Puntos
+  ------------ --------
+  exacto       10
+  1            9
+  2            8
+  3            7
+  4            6
+  5            5
+  6            4
+  7            3
+  8            2
+  9            1
+  ≥10          0
 
-### 4️⃣ Validación contra diccionario
+------------------------------------------------------------------------
 
-Normalización para evitar errores por formato:
+# 📤 Compartir resultados
 
-```ts
-const normalized = currentWord.trim().toUpperCase()
-const isValid = dictionary.includes(normalized)
-```
+Después de completar los retos diarios se puede compartir el resultado.
 
-⚠️ Todo el diccionario debe estar en el mismo formato (por ejemplo, todo en mayúsculas).
+Ejemplo:
 
----
+EL RETO DEL DÍA
 
-### 5️⃣ Estilo global
+🔤 Palabra: 8\
+➗ Cálculo: 7
 
-En `globals.css`:
+Total: 15
 
-```css
-body {
-  margin: 0;
-  background: #0b0b0b;
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-}
-```
+------------------------------------------------------------------------
 
----
+# 🧠 Filosofía del juego
 
-## 🧪 Cómo ejecutar en local
+El objetivo es crear un juego diario que sea:
+
+-   rápido de jugar
+-   desafiante
+-   compartible
+-   fácil de entender
+-   divertido
+
+Inspirado en juegos diarios como:
+
+-   Wordle
+-   Nerdle
+-   Framed
+
+------------------------------------------------------------------------
+
+# 🧩 Arquitectura del proyecto
+
+El proyecto está construido con:
+
+-   Next.js
+-   React
+-   TypeScript
+-   LocalStorage para persistencia del estado diario
+
+------------------------------------------------------------------------
+
+# 📂 Estructura del proyecto
+
+app/ palabra/ calculo/ resultado/
+
+components/ LettersGame.tsx NumbersGame.tsx GameIntroModal.tsx Tile.tsx
+
+lib/ game/ getDailyGame.ts numbers/ engine.ts types.ts dailyState.ts
+shareResult.ts
+
+------------------------------------------------------------------------
+
+# 💾 Persistencia
+
+El estado del jugador se guarda en:
+
+localStorage
+
+Esto permite:
+
+-   continuar partidas
+-   guardar resultados diarios
+-   evitar repetir retos
+
+------------------------------------------------------------------------
+
+# 📊 Analytics
+
+El proyecto incluye seguimiento básico de uso.
+
+Eventos previstos:
+
+-   start_word
+-   finish_word
+-   start_numbers
+-   finish_numbers
+-   share_result
+
+------------------------------------------------------------------------
+
+# 🚀 Roadmap
+
+## Beta actual
+
+Funcionalidades actuales:
+
+-   juego de palabra
+-   juego de cálculo
+-   resultado diario
+-   compartir resultado
+-   persistencia local
+
+------------------------------------------------------------------------
+
+## Próximas mejoras
+
+### Gameplay
+
+-   diccionario ampliado (incluyendo palabras en femenino)
+-   tutorial animado para el juego de cálculo
+-   mejora de la dificultad de los retos
+
+### Experiencia de usuario
+
+-   página de inicio mejorada
+-   estadísticas del jugador
+-   sistema de racha diaria
+-   página de resultados más completa
+
+### Viralidad
+
+-   compartir resultados estilo Wordle
+-   enlaces al reto del día
+-   visualización gráfica del resultado
+
+### Futuro
+
+-   ranking semanal
+-   archivo de retos anteriores
+-   nuevos tipos de retos
+
+------------------------------------------------------------------------
+
+# 🛠 Desarrollo
+
+Clonar el proyecto:
+
+git clone https://github.com/kizzton/reto-diario
 
 Instalar dependencias:
 
-```bash
 npm install
-```
 
-Ejecutar en desarrollo:
+Ejecutar entorno local:
 
-```bash
 npm run dev
-```
 
-Probar build de producción:
+Abrir:
 
-```bash
-npm run build
-```
+http://localhost:3000
 
----
+------------------------------------------------------------------------
 
-## 🌍 Deploy
+# 👤 Autor
 
-El proyecto está preparado para desplegarse en:
+Proyecto creado por:
 
-### Vercel
+Miguel
 
-1. Subir repo a GitHub
-2. Conectar en https://vercel.com
-3. Deploy automático detectando Next.js
-
----
-
-## 🎯 Próximos pasos posibles
-
-- Persistencia diaria real (semilla por fecha)
-- Sistema de puntuación
-- Ranking
-- Animaciones más pulidas
-- Feedback visual tipo Wordle (flip animation)
-- Modo cálculo (números)
-- Compartir resultado en formato visual (cuadros de colores)
-- Dominio propio
-
----
-
-## 🧠 Filosofía del proyecto
-
-Publicar antes de perfeccionar.  
-Validar con usuarios reales.  
-Iterar rápido.
-
-Primero jugable.  
-Luego bonito.  
-Después escalable.
-
----
-
-## 👨‍💻 Autor
-
-Miguel – Proyecto experimental de reto diario gamificado.
+GitHub: https://github.com/kizzton
