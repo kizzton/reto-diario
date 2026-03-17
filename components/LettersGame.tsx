@@ -237,6 +237,10 @@ useEffect(() => {
           {result === "invalid" && (
             <>
               <h2>Palabra no válida</h2>
+              <p>
+                Puedes formar una palabra como{" "}
+                <strong>{bestWord}</strong>.
+              </p>
               <p>Inténtalo de nuevo mañana 😉</p>
             </>
           )}

@@ -6,15 +6,18 @@ import { findBestWord } from "../letters/solver"
 import dictionary from "@/lib/data/dictionary.json"
 
 export function getDailyGame() {
-  const seedLetters = getDailySeedLetters()
-  const seedNumbers = getDailySeedNumbers()
+  const seedLetters = getDailySeedLetters(new Date("2026-03-18"))
+  const seedNumbers = getDailySeedNumbers(new Date("2026-03-18"))
 
-  const lettersGame = generateLettersGame(seedLetters)
+  const lettersGameData = generateLettersGame(Number(seedLetters))
+  const bestWord = findBestWord(
+    lettersGameData.letters,
+    dictionary
+  )
   const numbersGame = generateNumbersGame(seedNumbers)
-  const bestWord = findBestWord(lettersGame, dictionary)
 
   return {
-    letters: lettersGame,
+    letters: lettersGameData.letters,
     bestWord,
     numbers: numbersGame
   }

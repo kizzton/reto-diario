@@ -3,6 +3,55 @@ import type { Operator, NumbersGame, SolutionStep } from "./types"
 
 const LARGE_NUMBERS = [25, 50, 75, 100]
 
+const DISTRIBUTIONS = [
+  { small: 4, large: 2, weight: 0.5 },
+  { small: 5, large: 1, weight: 0.35 },
+  { small: 6, large: 0, weight: 0.15 }
+]
+
+const SOLUTION_SIZES = [
+  { size: 6, weight: 0.5 },
+  { size: 5, weight: 0.35 },
+  { size: 4, weight: 0.15 }
+]
+
+function pickDistribution(random: () => number) {
+  const r = random()
+  let acc = 0
+
+  for (const dist of DISTRIBUTIONS) {
+    acc += dist.weight
+    if (r <= acc) return dist
+  }
+
+  return DISTRIBUTIONS[0] // fallback
+}
+
+function pickSolutionSize(random: () => number) {
+  const r = random()
+  let acc = 0
+
+  for (const s of SOLUTION_SIZES) {
+    acc += s.weight
+    if (r <= acc) return s.size
+  }
+
+  return 6
+}
+
+function pickSubset(random: () => number, arr: number[], size: number) {
+  const copy = [...arr]
+  const result: number[] = []
+
+  while (result.length < size && copy.length > 0) {
+    const idx = randomInt(random, 0, copy.length - 1)
+    result.push(copy[idx])
+    copy.splice(idx, 1)
+  }
+
+  return result
+}
+
 function randomInt(random: () => number, min: number, max: number) {
   return Math.floor(random() * (max - min + 1)) + min
 }
@@ -18,11 +67,15 @@ function pickLarge(random: () => number) {
 function generateNumbersSet(random: () => number): number[] {
   const numbers: number[] = []
 
-  for (let i = 0; i < 4; i++) {
+  const distribution = pickDistribution(random)
+
+  // pequeños
+  for (let i = 0; i < distribution.small; i++) {
     numbers.push(pickSmall(random))
   }
 
-  for (let i = 0; i < 2; i++) {
+  // grandes
+  for (let i = 0; i < distribution.large; i++) {
     numbers.push(pickLarge(random))
   }
 
@@ -92,9 +145,18 @@ export function generateNumbersGame(seed: string): NumbersGame {
 
   while (true) {
     const numbers = generateNumbersSet(random)
-    const built = buildTarget(random, numbers)
 
-    if (built && built.target > 0 && built.target <= 999) {
+    const solutionSize = pickSolutionSize(random)
+    const numbersForSolution = pickSubset(random, numbers, solutionSize)
+
+    const built = buildTarget(random, numbersForSolution)
+
+    if (
+      built &&
+      built.target > 0 &&
+      built.target <= 999 &&
+      built.solution.length >= solutionSize - 1 // 👈 clave
+    ) {
       return {
         numbers,
         target: built.target,

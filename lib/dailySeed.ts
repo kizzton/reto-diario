@@ -1,17 +1,30 @@
-export function getDailySeedLetters(date?: Date): number {
+export function getDateString(date?: Date): string {
   const today = date ?? new Date()
-  const dateString = today.toISOString().split("T")[0]
-
-  let hash = 0
-  for (let i = 0; i < dateString.length; i++) {
-    hash = dateString.charCodeAt(i) + ((hash << 5) - hash)
-  }
-
-  return Math.abs(hash)
+  return today.toISOString().split("T")[0]
 }
 
-export function getDailySeedNumbers(): string {
-  return new Date().toISOString().slice(0, 10)
+// 🔤 Seed para letras (mejorado)
+export function getDailySeedLetters(date?: Date): string {
+  const dateString = getDateString(date)
+  return hashString(`letters-${dateString}`)
+}
+
+// ➗ Seed para números (también mejorado)
+export function getDailySeedNumbers(date?: Date): string {
+  const dateString = getDateString(date)
+  return hashString(`numbers-${dateString}`)
+}
+
+// 🔑 Hash simple pero suficiente
+function hashString(str: string): string {
+  let hash = 0
+
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i)
+    hash |= 0
+  }
+
+  return Math.abs(hash).toString()
 }
 
 export function createSeededRandom(seed: string) {

@@ -1,76 +1,47 @@
-const LETTER_DISTRIBUTION: Record<string, number> = {
-  A: 2,
-  E: 2,
-  O: 2,
-  I: 2,
-  U: 2,
-
-  R: 2,
-  S: 2,
-  N: 2,
-  L: 2,
-  T: 2,
-  D: 2,
-  C: 2,
-  M: 2,
-  P: 2,
-  B: 2,
-  G: 2,
-  V: 1,
-  H: 2,
-  F: 1,
-  Y: 1,
-
-  Q: 1,
-  J: 1,
-  Ñ: 1,
-  X: 1,
-  Z: 1,
-  K: 1,
-  W: 1,
-}
-const LETTER_POOL = Object.entries(LETTER_DISTRIBUTION).flatMap(
-  ([letter, count]) => Array(count).fill(letter)
-)
+import dictionary from "@/lib/data/dictionary.json"
 
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000
   return x - Math.floor(x)
 }
 
-const VOWELS = ["A", "E", "I", "O", "U"]
-
-export function generateLettersGame(seed: number): string[] {
-  const letters: string[] = []
+function pickWord(seed: number): string {
   let currentSeed = seed
 
-  const numberOfVowels = 3 + Math.floor(seededRandom(currentSeed++) * 3) 
-  // entre 3 y 5
+  while (true) {
+    const index = Math.floor(seededRandom(currentSeed++) * dictionary.length)
+    const word = dictionary[index]
 
-  while (letters.length < 9) {
-    const index = Math.floor(
-      seededRandom(currentSeed++) * LETTER_POOL.length
-    )
-
-    const letter = LETTER_POOL[index]
-
-    const vowelCount = letters.filter(l => VOWELS.includes(l)).length
-
-    if (VOWELS.includes(letter)) {
-      if (vowelCount < numberOfVowels) {
-        letters.push(letter)
-      }
-    } else {
-      if (letters.length - vowelCount < 9 - numberOfVowels) {
-        letters.push(letter)
-      }
+    // Evitamos palabras muy cortas (importante)
+    if (word.length >= 5 && word.length <= 9) {
+      return word
     }
   }
-
-  return shuffleWithSeed(letters, currentSeed)
 }
 
-function shuffleWithSeed(array: string[], seed: number) {
+const LETTER_POOL = [
+  ..."AAAAAAEEEIIIIOOO",
+  ..."BCDFGHJKLMNÑPRST",
+  ..."UVXYZ"
+]
+
+function generateLettersFromWord(word: string, seed: number): string[] {
+  let currentSeed = seed
+
+  const letters = word.split("")
+
+  while (letters.length < 9) {
+    const extra =
+      LETTER_POOL[
+        Math.floor(seededRandom(currentSeed++) * LETTER_POOL.length)
+      ]
+    letters.push(extra)
+  }
+
+  return shuffle(letters, currentSeed)
+}
+
+function shuffle(array: string[], seed: number) {
   const result = [...array]
   let currentSeed = seed
 
@@ -80,4 +51,14 @@ function shuffleWithSeed(array: string[], seed: number) {
   }
 
   return result
+}
+
+export function generateLettersGame(seed: number) {
+  const word = pickWord(seed)
+  const letters = generateLettersFromWord(word, seed)
+
+  return {
+    letters,
+    solution: word
+  }
 }
