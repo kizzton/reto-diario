@@ -48,7 +48,7 @@ export default function Home({ searchParams }: { searchParams: Promise<{ date?: 
 
   const numbersEmoji =
     state.numbersScore === 10 ? "🟩" :
-    state.numbersScore >= 6 ? "🟨" :
+    state.numbersScore >= 1 ? "🟨" :
     state.numbersScore > 0 ? "🟥" :
     "⬜"
 
@@ -109,7 +109,7 @@ export default function Home({ searchParams }: { searchParams: Promise<{ date?: 
           </p>
 
           <p className="text-lg">
-            🧮 Cálculo {numbersEmoji} {state.numbersScore}pts
+            🔢 Cálculo {numbersEmoji} {state.numbersScore}pts
           </p>
 
           <h2 className="text-xl font-bold mt-4">
