@@ -1,29 +1,28 @@
 "use client"
 
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { loadDailyState } from "@/lib/dailyState"
 import { formatLocalDate } from "@/lib/utils/date"
 import { shareDailyResult } from "@/lib/shareResult"
+import { use } from "react"
 
-export default function Home() {
+export default function Home({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
 
-  const searchParams = useSearchParams()
+  const params = use(searchParams)
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [state, setState] = useState<any>(null)
 
   useEffect(() => {
-    const dateParam = searchParams.get("date")
-    const date = dateParam ? new Date(dateParam) : new Date()
+    const date = params?.date ? new Date(params.date) : new Date()
 
     setSelectedDate(date)
 
     const daily = loadDailyState(date)
     setState(daily)
 
-  }, [searchParams])
+  }, [params])
 
   if (!selectedDate || !state) return null
 
