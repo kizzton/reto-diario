@@ -11,11 +11,8 @@ import {
 import type { NumbersGame, NumbersEngineState, Operator } from "@/lib/numbers/types"
 import "@/styles/game.css"
 import { loadDailyState, saveDailyState } from "@/lib/dailyState"
-import { shareDailyResult } from "@/lib/shareResult"
 import Link from "next/link"
-import type { ResultNumber } from "@/lib/numbers/types"
 import { formatLocalDate } from "@/lib/utils/date"
-import { useSearchParams } from "next/navigation"
 
 type Props = {
   game: NumbersGame
@@ -174,9 +171,7 @@ export default function NumbersGame({ game, alreadyPlayed, date }: Props) {
     setDailyState(updated)
   }
 
-  const searchParams = useSearchParams()
-  const dateParam = searchParams.get("date")
-  const selectedDate = dateParam ? new Date(dateParam) : new Date()
+  const selectedDate = date ?? new Date()
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-10">

@@ -1,15 +1,13 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { formatLocalDate } from "@/lib/utils/date"
 import { Home, Calendar } from "lucide-react"
 
-export default function Header() {
+export default function Header({ date }: { date?: string }) {
   const router = useRouter()
-  const searchParams = useSearchParams()
 
-  const dateParam = searchParams.get("date")
-  const selectedDate = dateParam ? new Date(dateParam) : new Date()
+  const selectedDate = date ? new Date(date) : new Date()
 
   const dateStr = formatLocalDate(selectedDate)
 

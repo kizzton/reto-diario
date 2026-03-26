@@ -1,5 +1,4 @@
 import { loadDailyState } from "./dailyState"
-import { useSearchParams } from "next/navigation"
 
 export function shareDailyResult(date: Date) {
 

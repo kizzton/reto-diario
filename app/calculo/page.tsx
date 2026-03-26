@@ -1,17 +1,17 @@
 "use client"
 
-import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { getDailyGame } from "@/lib/game/getDailyGame"
 import NumbersGame from "@/components/NumbersGame"
 import GameIntroModal from "@/components/GameIntroModal"
 import { loadDailyState } from "@/lib/dailyState"
 import { formatLocalDate } from "@/lib/utils/date"
+import { use } from "react"
 
-export default function CalculoPage() {
+export default function CalculoPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
 
-  const searchParams = useSearchParams()
-  const dateParam = searchParams.get("date")
+  const params = use(searchParams)
+  const dateParam = params?.date
 
   const selectedDate = dateParam ? new Date(dateParam) : new Date()
 
