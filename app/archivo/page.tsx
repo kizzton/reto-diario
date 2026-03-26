@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { loadDailyState } from "@/lib/dailyState"
 import { formatLocalDate } from "@/lib/utils/date"
+import Header from "@/components/Header"
 
 function getAllDatesOfMonth(year: number, month: number) {
   const dates: Date[] = []
@@ -19,7 +20,7 @@ function getAllDatesOfMonth(year: number, month: number) {
 
 
 
-export default function ArchivoPage() {
+export default function ArchivoPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const router = useRouter()
 
   const [dates, setDates] = useState<Date[]>([])
@@ -61,8 +62,15 @@ export default function ArchivoPage() {
     router.push(`/?date=${dateStr}`)
   }
 
+  const params = use(searchParams)
+  const dateParam = params?.date
+
+  const selectedDate = dateParam ? new Date(dateParam) : new Date()
+  const dateStr = formatLocalDate(selectedDate)
+
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-10">
+      <Header date={dateStr} />
       <div style={{ padding: 20, textAlign: "center" }}>
 
         <div

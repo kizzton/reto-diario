@@ -6,6 +6,7 @@ import { loadDailyState } from "@/lib/dailyState"
 import { formatLocalDate } from "@/lib/utils/date"
 import { shareDailyResult } from "@/lib/shareResult"
 import { use } from "react"
+import Header from "@/components/Header"
 
 export default function Home({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
 
@@ -54,6 +55,7 @@ export default function Home({ searchParams }: { searchParams: Promise<{ date?: 
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-10">
+      <Header date={dateStr} />
 
       {/* 📅 FECHA */}
       <p className="text-gray-500">

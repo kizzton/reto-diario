@@ -1,16 +1,15 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { formatLocalDate } from "@/lib/utils/date"
 import { Home, Calendar } from "lucide-react"
 
-export default function Header() {
-
+export default function Header({ date }: { date?: string }) {
   const router = useRouter()
-  const searchParams = useSearchParams()
 
-  const dateParam = searchParams.get("date")
-  const dateStr = dateParam ?? formatLocalDate(new Date())
+  const selectedDate = date ? new Date(date) : new Date()
+
+  const dateStr = formatLocalDate(selectedDate)
 
   return (
     <header style={{ backgroundColor: "#f5f5f5" }} className="fixed top-0 left-0 right-0 z-50">
@@ -22,7 +21,7 @@ export default function Header() {
           onClick={() => router.push(`/?date=${dateStr}`)}
           className="text-xl"
         >
-          <Home size={20} />
+            <Home size={20} />
         </button>
 
         {/* 🧠 TITLE */}
@@ -32,7 +31,7 @@ export default function Header() {
 
         {/* 📅 ARCHIVO */}
         <button
-          onClick={() => router.push(`/archivo?date=${dateStr}`)}
+          onClick={() => router.push("/archivo")}
           className="text-xl"
         >
           <Calendar size={20} />

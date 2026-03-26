@@ -7,6 +7,7 @@ import GameIntroModal from "@/components/GameIntroModal"
 import { loadDailyState } from "@/lib/dailyState"
 import { formatLocalDate } from "@/lib/utils/date"
 import { use } from "react"
+import Header from "@/components/Header"
 
 export default function CalculoPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
 
@@ -14,6 +15,7 @@ export default function CalculoPage({ searchParams }: { searchParams: Promise<{ 
   const dateParam = params?.date
 
   const selectedDate = dateParam ? new Date(dateParam) : new Date()
+  const dateStr = formatLocalDate(selectedDate)
 
   const game = getDailyGame(selectedDate)
 
@@ -53,7 +55,7 @@ export default function CalculoPage({ searchParams }: { searchParams: Promise<{ 
 
   return (
     <main className="flex justify-center pt-10">
-
+      <Header date={dateStr} />
       {!started && (
         <GameIntroModal
           title="El cálculo del día"
