@@ -1,6 +1,8 @@
+import { formatLocalDate } from "@/lib/utils/date"
+
 export function getDateString(date?: Date): string {
   const today = date ?? new Date()
-  return today.toISOString().split("T")[0]
+  return formatLocalDate(today)
 }
 
 // 🔤 Seed para letras (mejorado)

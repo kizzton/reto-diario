@@ -1,22 +1,29 @@
 "use client"
 
+import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { getDailyGame } from "@/lib/game/getDailyGame"
 import LettersGame from "@/components/LettersGame"
 import GameIntroModal from "@/components/GameIntroModal"
 import { loadDailyState } from "@/lib/dailyState"
-
-const game = getDailyGame()
+import { formatLocalDate } from "@/lib/utils/date"
 
 export default function PalabraPage() {
+
+  const searchParams = useSearchParams()
+  const dateParam = searchParams.get("date")
+
+  const selectedDate = dateParam ? new Date(dateParam) : new Date()
+
+  const game = getDailyGame(selectedDate)
 
   const [started, setStarted] = useState(false)
   const [alreadyPlayed, setAlreadyPlayed] = useState<boolean | null>(null)
 
   useEffect(() => {
-    const daily = loadDailyState()
+    const daily = loadDailyState(selectedDate)
     setAlreadyPlayed(daily.wordPlayed)
-  }, [])
+  }, [selectedDate])
 
   if (alreadyPlayed === null) {
     return null
@@ -28,7 +35,20 @@ export default function PalabraPage() {
         letters={game.letters}
         bestWord={game.bestWord}
         alreadyPlayed={true}
+        date={selectedDate}
       />
+    )
+  }
+
+  const today = formatLocalDate(new Date())
+  const current = selectedDate ? formatLocalDate(selectedDate) : today
+  const isFuture = current > today
+
+  if (isFuture) {
+    return (
+      <main className="flex items-center justify-center min-h-screen">
+        <p>🔒 Este reto aún no está disponible</p>
+      </main>
     )
   }
 
@@ -46,6 +66,7 @@ export default function PalabraPage() {
         <LettersGame
           letters={game.letters}
           bestWord={game.bestWord}
+          date={selectedDate}
         />
       )}
 

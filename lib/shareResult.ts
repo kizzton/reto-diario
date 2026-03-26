@@ -1,10 +1,11 @@
 import { loadDailyState } from "./dailyState"
+import { useSearchParams } from "next/navigation"
 
-export function shareDailyResult() {
+export function shareDailyResult(date: Date) {
 
-  const daily = loadDailyState()
+  const daily = loadDailyState(date)
 
-  const date = new Date().toLocaleDateString("es-ES")
+  const formattedDate = date.toLocaleDateString("es-ES")
 
   const wordEmoji =
     daily.wordResult === "max" ? "🟩" :
@@ -13,25 +14,23 @@ export function shareDailyResult() {
 
   const numbersEmoji =
     daily.numbersScore === 10 ? "🟩" :
-    daily.numbersScore >= 6 ? "🟨" :
+    daily.numbersScore >= 1 ? "🟨" :
     "🟥"
 
   const total = daily.wordScore + daily.numbersScore
 
   const text =
-`🧠 El Reto del Día — ${date}
+  `🧠 El Reto del Día — ${formattedDate}
 
-🔤 Palabra: ${wordEmoji} ${daily.wordScore} pts
-🔢 Cálculo: ${numbersEmoji} ${daily.numbersScore} pts
+  🔤 Palabra: ${wordEmoji} ${daily.wordScore}pts
+  🔢 Cálculo: ${numbersEmoji} ${daily.numbersScore}pts
 
-Total: ${total} puntos
+  🏆 ${total} puntos
 
-¿Puedes superarme?
-https://elretodeldia.es`
+  ¿Puedes superarme?
+  https://elretodeldia.es`
 
   navigator.clipboard.writeText(text)
-
-  alert("Resultado copiado para compartir 🚀")
 
   window.open(
     `https://wa.me/?text=${encodeURIComponent(text)}`,

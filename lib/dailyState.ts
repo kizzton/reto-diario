@@ -1,3 +1,5 @@
+import { formatLocalDate } from "@/lib/utils/date"
+
 export interface DailyGameState {
   date: string
 
@@ -12,13 +14,13 @@ export interface DailyGameState {
   numbersEngine?: any
 }
 
-function today(): string {
-  return new Date().toISOString().slice(0, 10)
+function getDateString(date?: Date): string {
+  return formatLocalDate(date ?? new Date())
 }
 
-function createState(): DailyGameState {
+function createState(date: string): DailyGameState {
   return {
-    date: today(),
+    date,
     wordPlayed: false,
     numbersPlayed: false,
     wordScore: 0,
@@ -26,34 +28,32 @@ function createState(): DailyGameState {
   }
 }
 
-export function loadDailyState(): DailyGameState {
+function getKey(date: string) {
+  return `retoState-${date}`
+}
 
+export function loadDailyState(date?: Date): DailyGameState {
   if (typeof window === "undefined") {
-    return createState()
+    return createState(getDateString(date))
   }
 
-  const saved = localStorage.getItem("retoState")
+  const dateStr = getDateString(date)
+  const key = getKey(dateStr)
+
+  const saved = localStorage.getItem(key)
 
   if (!saved) {
-    const newState = createState()
-    localStorage.setItem("retoState", JSON.stringify(newState))
+    const newState = createState(dateStr)
+    localStorage.setItem(key, JSON.stringify(newState))
     return newState
   }
 
-  const parsed = JSON.parse(saved)
-
-  if (parsed.date !== today()) {
-    const newState = createState()
-    localStorage.setItem("retoState", JSON.stringify(newState))
-    return newState
-  }
-
-  return parsed
+  return JSON.parse(saved)
 }
 
 export function saveDailyState(state: DailyGameState) {
-
   if (typeof window === "undefined") return
 
-  localStorage.setItem("retoState", JSON.stringify(state))
+  const key = getKey(state.date)
+  localStorage.setItem(key, JSON.stringify(state))
 }

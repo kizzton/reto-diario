@@ -6,19 +6,22 @@ import { loadDailyState, saveDailyState } from "@/lib/dailyState"
 import { shareDailyResult } from "@/lib/shareResult"
 import "@/styles/game.css"
 import Link from "next/link"
+import { formatLocalDate } from "@/lib/utils/date"
+import { useSearchParams } from "next/navigation"
 
 interface Props {
   letters: string[]
   bestWord: string
   alreadyPlayed?: boolean
+  date?: Date
 }
 
-export default function LettersGame({ letters, bestWord, alreadyPlayed }: Props) {
+export default function LettersGame({ letters, bestWord, alreadyPlayed, date }: Props) {
   const MAX_LENGTH = letters.length
 
   const [input, setInput] = useState<string[]>(() => {
     if (alreadyPlayed) {
-      const daily = loadDailyState()
+      const daily = loadDailyState(date)
 
       if (daily.wordInput) {
         const savedLetters = daily.wordInput.split("")
@@ -33,17 +36,17 @@ export default function LettersGame({ letters, bestWord, alreadyPlayed }: Props)
   const [finished, setFinished] = useState(alreadyPlayed ?? false)
   const [result, setResult] = useState<"max" | "valid" | "invalid" | null>(() => {
     if (alreadyPlayed) {
-      const daily = loadDailyState()
+      const daily = loadDailyState(date)
       return daily.wordResult ?? null
     }
     return null
   })
 
-  const [dailyState, setDailyState] = useState(() => loadDailyState())
+  const [dailyState, setDailyState] = useState(() => loadDailyState(date))
   useEffect(() => {
-    const daily = loadDailyState()
+    const daily = loadDailyState(date)
     setDailyState(daily)
-  }, [])
+  }, [date])
 
   // ---------------- VALIDACIÓN ----------------
   function isValidWord(word: string) {
@@ -92,10 +95,11 @@ function finishGame() {
 
   setResult(gameResult)
 
-  const previous = loadDailyState()
+  const previous = loadDailyState(date)
 
   const updated = {
     ...previous,
+    date: date ? formatLocalDate(date) : previous.date,
     wordPlayed: true,
     wordScore: score,
     wordInput: word,
@@ -109,7 +113,7 @@ function finishGame() {
 useEffect(() => {
   if (!alreadyPlayed) return
 
-  const daily = loadDailyState()
+  const daily = loadDailyState(date)
 
   if (daily.wordInput) {
     const savedLetters = daily.wordInput.split("")
@@ -168,93 +172,107 @@ useEffect(() => {
 
   const currentWord = input.join("").trim()
 
-  return (
-    <div style={{ textAlign: "center", marginTop: 40 }}>
-      <h1 style={{ marginBottom: 4 }}><a href="https://elretodeldia.es">EL RETO DEL DÍA</a></h1>
-      <h3 style={{ color: "#777", marginTop: 0 }}>LA PALABRA</h3>
+  const searchParams = useSearchParams()
+  const dateParam = searchParams.get("date")
+  const selectedDate = dateParam ? new Date(dateParam) : new Date()
 
-      {/* Cajas */}
-      <div className="row" style={{ gap: 2 }}>
-        {input.map((letter, index) => (
-          <div
-            key={index}
-            onClick={() => setSelectedIndex(index)}
+  return (
+    <main className="flex flex-col items-center justify-center min-h-screen gap-10">
+      <div style={{ textAlign: "center" }}>
+
+        {/* 📅 FECHA */}
+        <p className="text-gray-500">
+          {selectedDate.toLocaleDateString("es-ES", {
+            weekday: "long",
+            day: "numeric",
+            month: "long"
+          })}
+        </p>
+        
+        <h3 style={{ color: "#777", margin: 10 }}>LA PALABRA</h3>
+
+        {/* Cajas */}
+        <div className="row" style={{ gap: 2 }}>
+          {input.map((letter, index) => (
+            <div
+              key={index}
+              onClick={() => setSelectedIndex(index)}
+              style={{
+                width: 40,
+                height: 50,
+                borderRadius: 8,
+                border:
+                  selectedIndex === index && !finished
+                    ? "3px solid #3b82f6"
+                    : "2px solid #ccc",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 28,
+                fontWeight: "bold",
+                backgroundColor: getBoxColor(),
+                color: finished ? "white" : "black",
+                cursor: finished ? "default" : "pointer",
+              }}
+            >
+              {letter}
+            </div>
+          ))}
+        </div>
+
+        <div
             style={{
-              width: 40,
-              height: 50,
-              borderRadius: 8,
-              border:
-                selectedIndex === index && !finished
-                  ? "3px solid #3b82f6"
-                  : "2px solid #ccc",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 28,
-              fontWeight: "bold",
-              backgroundColor: getBoxColor(),
-              color: finished ? "white" : "black",
-              cursor: finished ? "default" : "pointer",
+              marginTop: 8,
+              fontSize: 18,
+              color: timeLeft <= 10 ? "#dc2626" : "#111"
             }}
           >
-            {letter}
-          </div>
-        ))}
-      </div>
-
-      <div
-          style={{
-            marginTop: 8,
-            fontSize: 18,
-            color: timeLeft <= 10 ? "#dc2626" : "#111"
-          }}
-        >
-        {timeLeft}s
-      </div>
-
-      {/* Mensaje resultado */}
-      {finished && (
-        <div style={{ marginTop: 30 }}>
-          {result === "max" && (
-            <>
-              <h2>¡IMPRESIONANTE!</h2>
-              <p>
-                Has conseguido hacer la palabra más larga posible.
-              </p>
-            </>
-          )}
-
-          {result === "valid" && (
-            <>
-              <h2>¡CASI PERFECTO!</h2>
-              <p>
-                Aún se podían usar más letras, como en{" "}
-                <strong>{bestWord}</strong>.
-              </p>
-            </>
-          )}
-
-          {result === "invalid" && (
-            <>
-              <h2>Palabra no válida</h2>
-              <p>
-                Puedes formar una palabra como{" "}
-                <strong>{bestWord}</strong>.
-              </p>
-              <p>Inténtalo de nuevo mañana 😉</p>
-            </>
-          )}
-          <p style={{ marginTop: 10, fontWeight: "bold" }}>
-            Puntos: {dailyState.wordScore}
-          </p>
+          {timeLeft}s
         </div>
+
+        {/* Mensaje resultado */}
+        {finished && (
+          <div style={{ padding: 20 }}>
+            {result === "max" && (
+              <>
+                <h2>¡IMPRESIONANTE!</h2>
+                <p>
+                  Has conseguido hacer la palabra más larga posible.
+                </p>
+              </>
+            )}
+
+            {result === "valid" && (
+              <>
+                <h2>¡CASI PERFECTO!</h2>
+                <p>
+                  Aún se podían usar más letras, como en{" "}
+                  <strong>{bestWord}</strong>.
+                </p>
+              </>
+            )}
+
+            {result === "invalid" && (
+              <>
+                <h2>Palabra no válida</h2>
+                <p>
+                  Puedes formar una palabra como{" "}
+                  <strong>{bestWord}</strong>.
+                </p>
+                <p>Inténtalo de nuevo mañana 😉</p>
+              </>
+            )}
+            <p style={{ marginTop: 10, fontWeight: "bold" }}>
+              Puntos: {dailyState.wordScore}
+            </p>
+          </div>
       )}
 
       {finished && (
   <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
 
     {!dailyState.numbersPlayed && (
-      <Link href="/calculo">
+      <Link href={`/calculo?date=${formatLocalDate(date!)}`}>
         <button className="px-4 py-2 bg-blue-500 text-white rounded-lg">
           Jugar cálculo
         </button>
@@ -262,7 +280,7 @@ useEffect(() => {
     )}
 
     {dailyState.numbersPlayed && (
-          <Link href="/resultado">
+          <Link href={`/?date=${formatLocalDate(date!)}`}>
             <button className="px-4 py-2 bg-green-500 text-white rounded-lg">
               Ver resultado diario
             </button>
@@ -331,5 +349,6 @@ useEffect(() => {
         </button>
       </div>
     </div>
+    </main>
   )
 }

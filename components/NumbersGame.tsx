@@ -14,16 +14,19 @@ import { loadDailyState, saveDailyState } from "@/lib/dailyState"
 import { shareDailyResult } from "@/lib/shareResult"
 import Link from "next/link"
 import type { ResultNumber } from "@/lib/numbers/types"
+import { formatLocalDate } from "@/lib/utils/date"
+import { useSearchParams } from "next/navigation"
 
 type Props = {
   game: NumbersGame
   alreadyPlayed?: boolean
+  date?: Date
 }
 
-export default function NumbersGame({ game, alreadyPlayed }: Props) {
+export default function NumbersGame({ game, alreadyPlayed, date }: Props) {
     const [engine, setEngine] = useState(() => {
 
-      const daily = loadDailyState()
+      const daily = loadDailyState(date)
 
       if (alreadyPlayed && daily.numbersEngine) {
         return daily.numbersEngine
@@ -34,13 +37,13 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
 
   const [timeLeft, setTimeLeft] = useState(alreadyPlayed ? 0:60)
   const [finished, setFinished] = useState(alreadyPlayed ?? false)
-  const [dailyState, setDailyState] = useState(() => loadDailyState())
+  const [dailyState, setDailyState] = useState(() => loadDailyState(date))
 
   const lastResult = (() => {
 
     // si ya se jugó hoy, usar siempre el resultado guardado
     if (alreadyPlayed) {
-      const daily = loadDailyState()
+      const daily = loadDailyState(date)
       return daily.numbersResult ?? null
     }
 
@@ -149,9 +152,7 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
 
     const currentEngine = engineRef.current
 
-    const updated = { ...dailyState }
-
-    updated.numbersPlayed = true
+    const previous = loadDailyState(date)
 
     const finalResult =
       currentEngine.resultNumbers.length > 0
@@ -160,18 +161,37 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
 
     const finalScore = computeScore(currentEngine.target, finalResult)
 
-    updated.numbersScore = finalScore
-    updated.numbersResult = finalResult
-    updated.numbersEngine = currentEngine
+    const updated = {
+      ...previous,
+      date: date ? formatLocalDate(date) : previous.date,
+      numbersPlayed: true,
+      numbersScore: finalScore,
+      numbersResult: finalResult,
+      numbersEngine: currentEngine
+    }
 
     saveDailyState(updated)
     setDailyState(updated)
   }
 
+  const searchParams = useSearchParams()
+  const dateParam = searchParams.get("date")
+  const selectedDate = dateParam ? new Date(dateParam) : new Date()
+
   return (
+    <main className="flex flex-col items-center justify-center min-h-screen gap-10">
     <div className="game-container">
-      <h1 style={{ marginBottom: 4 }}><a href="https://elretodeldia.es">EL RETO DEL DÍA</a></h1>
-      <h2 style={{ textAlign: "center" }}>EL CÁLCULO</h2>
+
+      {/* 📅 FECHA */}
+      <p className="text-gray-500">
+        {selectedDate.toLocaleDateString("es-ES", {
+          weekday: "long",
+          day: "numeric",
+          month: "long"
+        })}
+      </p>
+
+      <h2 style={{ textAlign: "center", margin: 10 }}>EL CÁLCULO</h2>
 
       <div style={{ textAlign: "center", marginBottom: 20 }}>
         <div style={{ fontSize: 24, fontWeight: 600 }}>
@@ -319,7 +339,7 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
         <div className="mt-6 flex flex-col gap-3 items-center">
 
           {!dailyState.wordPlayed && (
-            <Link href="/palabra">
+            <Link href={`/palabra?date=${formatLocalDate(date!)}`}>
               <button className="px-4 py-2 bg-blue-500 text-white rounded-lg">
                 Jugar palabra
               </button>
@@ -327,7 +347,7 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
           )}
 
           {dailyState.wordPlayed && (
-            <Link href="/resultado">
+            <Link href={`/?date=${formatLocalDate(date!)}`}>
               <button className="px-4 py-2 bg-green-500 text-white rounded-lg">
                 Ver resultado diario
               </button>
@@ -370,6 +390,7 @@ export default function NumbersGame({ game, alreadyPlayed }: Props) {
         </button>
       </div>
     </div>
+    </main>
   )
 
   function isUsed(id: string) {
