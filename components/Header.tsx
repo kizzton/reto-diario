@@ -12,7 +12,7 @@ export default function Header({ date }: { date?: string }) {
   const dateStr = formatLocalDate(selectedDate)
 
   return (
-    <header style={{ backgroundColor: "#f5f5f5" }} className="fixed top-0 left-0 right-0 z-50">
+    <header style={{ backgroundColor: "#ededed" }} className="fixed top-0 left-0 right-0 z-50">
 
       <div className="max-w-md mx-auto flex items-center justify-between px-4 py-3">
 

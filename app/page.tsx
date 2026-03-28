@@ -44,14 +44,12 @@ export default function Home({ searchParams }: { searchParams: Promise<{ date?: 
   const wordEmoji =
     state.wordResult === "max" ? "🟩" :
     state.wordResult === "valid" ? "🟨" :
-    state.wordResult === "invalid" ? "🟥" :
-    "⬜"
+    "🟥"
 
   const numbersEmoji =
     state.numbersScore === 10 ? "🟩" :
     state.numbersScore >= 1 ? "🟨" :
-    state.numbersScore > 0 ? "🟥" :
-    "⬜"
+    "🟥"
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-10">

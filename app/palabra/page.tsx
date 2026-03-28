@@ -15,7 +15,6 @@ export default function PalabraPage({ searchParams }: { searchParams: Promise<{ 
   const dateParam = params?.date
 
   const selectedDate = dateParam ? new Date(dateParam) : new Date()
-  const dateStr = formatLocalDate(selectedDate)
 
   const game = getDailyGame(selectedDate)
 
@@ -27,52 +26,46 @@ export default function PalabraPage({ searchParams }: { searchParams: Promise<{ 
     setAlreadyPlayed(daily.wordPlayed)
   }, [selectedDate])
 
-  if (alreadyPlayed === null) {
-    return null
-  }
-
-  if (alreadyPlayed) {
-    return (
-      <LettersGame
-        letters={game.letters}
-        bestWord={game.bestWord}
-        alreadyPlayed={true}
-        date={selectedDate}
-      />
-    )
-  }
-
   const today = formatLocalDate(new Date())
   const current = selectedDate ? formatLocalDate(selectedDate) : today
   const isFuture = current > today
 
-  if (isFuture) {
-    return (
-      <main className="flex items-center justify-center min-h-screen">
-        <p>🔒 Este reto aún no está disponible</p>
-      </main>
-    )
-  }
+  const dateStr = formatLocalDate(selectedDate)
 
   return (
-    <main className="flex justify-center pt-10">
+    <>
       <Header date={dateStr} />
-      {!started && (
-        <GameIntroModal
-          title="La palabra del día"
-          rules="Consigue la palabra más larga posible con las letras dadas en 60 segundos."
-          onStart={() => setStarted(true)}
-        />
-      )}
 
-      {started && (
+      {alreadyPlayed ? (
         <LettersGame
           letters={game.letters}
           bestWord={game.bestWord}
+          alreadyPlayed={true}
           date={selectedDate}
         />
-      )}
+      ) : isFuture ? (
+        <main className="flex items-center justify-center min-h-screen">
+          <p>🔒 Este reto aún no está disponible</p>
+        </main>
+      ) : (
+        <main className="flex justify-center pt-10">
+          {!started && (
+            <GameIntroModal
+              title="La palabra del día"
+              rules="Consigue la palabra más larga posible con las letras dadas en 60 segundos."
+              onStart={() => setStarted(true)}
+            />
+          )}
 
-    </main>
+          {started && (
+            <LettersGame
+              letters={game.letters}
+              bestWord={game.bestWord}
+              date={selectedDate}
+            />
+          )}
+        </main>
+      )}
+    </>
   )
 }

@@ -15,7 +15,6 @@ export default function CalculoPage({ searchParams }: { searchParams: Promise<{ 
   const dateParam = params?.date
 
   const selectedDate = dateParam ? new Date(dateParam) : new Date()
-  const dateStr = formatLocalDate(selectedDate)
 
   const game = getDailyGame(selectedDate)
 
@@ -27,51 +26,44 @@ export default function CalculoPage({ searchParams }: { searchParams: Promise<{ 
     setAlreadyPlayed(daily.numbersPlayed)
   }, [selectedDate])
 
-  if (alreadyPlayed === null) {
-    return null
-  }
-
-  if (alreadyPlayed) {
-    return (
-      <NumbersGame
-        game={game.numbers}
-        alreadyPlayed={true}
-        date={selectedDate}
-      />
-    )
-  }
-
   const today = formatLocalDate(new Date())
   const current = selectedDate ? formatLocalDate(selectedDate) : today
   const isFuture = current > today
 
-  if (isFuture) {
+  const dateStr = formatLocalDate(selectedDate)
+  
     return (
-      <main className="flex items-center justify-center min-h-screen">
-        <p>🔒 Este reto aún no está disponible</p>
-      </main>
+      <>
+        <Header date={dateStr} />
+  
+        {alreadyPlayed ? (
+          <NumbersGame
+            game={game.numbers}
+            alreadyPlayed={true}
+            date={selectedDate}
+          />
+        ) : isFuture ? (
+          <main className="flex items-center justify-center min-h-screen">
+            <p>🔒 Este reto aún no está disponible</p>
+          </main>
+        ) : (
+          <main className="flex justify-center pt-10">
+            {!started && (
+              <GameIntroModal
+                title="El cálculo del día"
+                rules="Usa los números disponibles para alcanzar el objetivo en 60 segundos."
+                onStart={() => setStarted(true)}
+              />
+            )}
+  
+            {started && (
+              <NumbersGame 
+                game={game.numbers}
+                date={selectedDate}
+              />
+            )}
+          </main>
+        )}
+      </>
     )
-  }
-
-  return (
-    <main className="flex justify-center pt-10">
-      <Header date={dateStr} />
-      {!started && (
-        <GameIntroModal
-          title="El cálculo del día"
-          rules="Usa los números disponibles para alcanzar el objetivo en 60 segundos."
-          onStart={() => setStarted(true)}
-        />
-      )}
-
-      {started && (
-        <NumbersGame 
-          game={game.numbers}
-          alreadyPlayed={alreadyPlayed}
-          date={selectedDate}
-        />
-      )}
-
-    </main>
-  )
 }
