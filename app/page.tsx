@@ -7,6 +7,9 @@ import { formatLocalDate } from "@/lib/utils/date"
 import { shareDailyResult } from "@/lib/shareResult"
 import { use } from "react"
 import Header from "@/components/Header"
+import { loadStreak, updateStreak } from "@/lib/streak"
+import WeeklyChart from "@/components/WeeklyChart"
+import { DayStats } from "@/lib/stats"
 
 export default function Home({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
 
@@ -14,6 +17,13 @@ export default function Home({ searchParams }: { searchParams: Promise<{ date?: 
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [state, setState] = useState<any>(null)
+
+  const [streak, setStreak] = useState<number>(0)
+  const [bestStreak, setBestStreak] = useState<number>(0)
+
+  const [streakUpdatedToday, setStreakUpdatedToday] = useState(false)
+
+  const [data, setData] = useState<DayStats[]>([])
 
   useEffect(() => {
     const date = params?.date ? new Date(params.date) : new Date()
@@ -24,6 +34,43 @@ export default function Home({ searchParams }: { searchParams: Promise<{ date?: 
     setState(daily)
 
   }, [params])
+
+  useEffect(() => {
+    const data = loadStreak()
+    setStreak(data.streak)
+    setBestStreak(data.bestStreak)
+  }, [])
+
+const wordPlayed = state?.wordPlayed
+const numbersPlayed = state?.numbersPlayed
+
+useEffect(() => {
+  const todayStr = formatLocalDate(new Date())
+  const selectedStr = selectedDate
+    ? formatLocalDate(selectedDate)
+    : null
+
+  if (
+    state &&
+    wordPlayed &&
+    numbersPlayed &&
+    !streakUpdatedToday &&
+    selectedStr === todayStr // 👈 CLAVE
+  ) {
+    const updated = updateStreak()
+
+    setStreak(updated.streak)
+    setBestStreak(updated.bestStreak)
+    setStreakUpdatedToday(true)
+  }
+}, [wordPlayed, numbersPlayed, selectedDate])
+
+function getStreakMessage(streak: number) {
+  if (streak === 1) return "🔥 Has jugado solo 1 día seguido"
+  if (streak < 5) return "💪 ¡Sigue así! Ya llevas jugando " + streak + " días seguidos"
+  if (streak < 10) return "🔥 ¡En racha! Llevas jugando " + streak + " días seguidos"
+  return "🚀 ¡Imparable! Llevas jugando " + streak + " días seguidos"
+}
 
   if (!selectedDate || !state) return null
 
@@ -52,7 +99,7 @@ export default function Home({ searchParams }: { searchParams: Promise<{ date?: 
     "🟥"
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen gap-10">
+    <main className="flex flex-col items-center min-h-screen gap-10 py-20">
       <Header date={dateStr} />
 
       {/* 📅 FECHA */}
@@ -63,6 +110,27 @@ export default function Home({ searchParams }: { searchParams: Promise<{ date?: 
           month: "long"
         })}
       </p>
+
+      {/* 🔥 RACHA */}
+      {selectedStr === todayStr && (
+      <div className="text-center">
+         <p className="text-lg font-semibold">
+          {getStreakMessage(streak)}
+        </p> 
+        {streak > 0 && (
+          <p className="text-sm text-gray-500">
+            🏆 Mejor racha: {bestStreak}
+          </p>
+        )}
+      </div>
+      )}
+      {selectedStr === todayStr &&
+        !(state.wordPlayed && state.numbersPlayed) &&
+        streak > 0 && (
+          <p className="text-sm text-orange-500 mt-2">
+            ⏳ Juega hoy para mantener tu racha
+          </p>
+      )}
 
       <div className="grid gap-6 w-[320px]">
 
@@ -125,6 +193,7 @@ export default function Home({ searchParams }: { searchParams: Promise<{ date?: 
         </div>
       )}
 
+      {/* 🔁 COMPARTIR */}
       {state.wordPlayed && state.numbersPlayed && (
         <div className="flex flex-col gap-3 mt-4">
 
@@ -136,6 +205,15 @@ export default function Home({ searchParams }: { searchParams: Promise<{ date?: 
           </button>
 
         </div>
+      )}
+
+      {/* 📊 ESTADÍSTICAS */}
+      {state.wordPlayed && state.numbersPlayed && (
+        <>
+        <div className="max-w-md mx-auto p-6 text-center">
+          <WeeklyChart />
+        </div>
+        </>
       )}
 
     </main>
