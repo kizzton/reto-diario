@@ -112,17 +112,16 @@ function getStreakMessage(streak: number) {
       </p>
 
       {/* 🔥 RACHA */}
-      {selectedStr === todayStr && (
-      <div className="text-center">
-         <p className="text-lg font-semibold">
-          {getStreakMessage(streak)}
-        </p> 
-        {streak > 0 && (
+      {selectedStr === todayStr &&
+        streak > 0 && (
+        <div className="text-center">
+          <p className="text-lg font-semibold">
+            {getStreakMessage(streak)}
+          </p> 
           <p className="text-sm text-gray-500">
             🏆 Mejor racha: {bestStreak}
           </p>
-        )}
-      </div>
+        </div>
       )}
       {selectedStr === todayStr &&
         !(state.wordPlayed && state.numbersPlayed) &&
